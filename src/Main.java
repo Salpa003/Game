@@ -10,6 +10,9 @@ public class Main {
         JFrame jFrame = getJFrame();
         Hero hero =new Hero(dimension.width/2-Hero.sizeHero,dimension.height/2-Hero.sizeHero);
         jFrame.add(hero);
+        hero.setBackground(Color.BLACK);
+        Menace menace = new Menace(dimension.width, dimension.height, 0,0);
+        hero.setMenace(menace);
         hero.requestFocusInWindow();
     }
 
