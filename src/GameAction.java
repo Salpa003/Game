@@ -1,5 +1,9 @@
 package src;
 
+import src.SupportClass.Cordinate;
+import src.SupportClass.Menace;
+import src.SupportClass.Vector;
+
 import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.*;
@@ -11,12 +15,14 @@ import java.util.*;
 import static java.awt.event.KeyEvent.*;
 
 public class GameAction extends JPanel implements ActionListener {
-    int timerDelay = 10;
-    int menaceSize = 40;
-    int menaceSpeed = 10;
+    boolean mouseMoved = false;
+   final int timerDelay = 10;
+    int iter = 0;
+   final int menaceSize = 40;
+   final int menaceSpeed = 10;
     long ID = Long.MIN_VALUE;
-    int width = Main.dimension.width;
-    int height = Main.dimension.height;
+  final   int width = Main.dimension.width;
+   final int height = Main.dimension.height;
     Hero hero;
     Timer timer;
     Map<Long, Menace> menace;
@@ -32,27 +38,23 @@ public class GameAction extends JPanel implements ActionListener {
         setFocusable(true);
         keyAction();
         menace = new HashMap<>();
-
-        label = new JLabel("0");
-        label.setLocation(width/2-width/10, height/25);
-      //  label.setBounds(width/2-width/10, height/25,width/10 , width/25);
-        label.setBackground(Color.CYAN);
-        label.setOpaque(true);
-        this.add(label);
+        settingLabel();
+        mouseMotion();
     }
 
-    int iter = 0;
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (hero.isUp()) hero.up();
-        if (hero.isDown()) hero.down();
-        if (hero.isLeft()) hero.left();
-        if (hero.isRight()) hero.right();
+        if (!mouseMoved) {
+            if (hero.isUp()) hero.up();
+            if (hero.isDown()) hero.down();
+            if (hero.isLeft()) hero.left();
+            if (hero.isRight()) hero.right();
+        }
 
         iter++;
 
-            label.setText(String.valueOf(iter/(1000/timerDelay)));
+        label.setText(String.valueOf(iter / (1000 / timerDelay)));
 
         if (iter % 10 == 0) {
             generateMenaces();
@@ -85,6 +87,9 @@ public class GameAction extends JPanel implements ActionListener {
                         break;
                     case VK_D:
                         hero.setRight(true);
+                        break;
+                    case VK_M:
+                        mouseMoved = !mouseMoved;
                         break;
                 }
                 if (!timer.isRunning()) {
@@ -139,7 +144,7 @@ public class GameAction extends JPanel implements ActionListener {
                 hero.setY(height / 2 - Hero.sizeHero);
                 timer.stop();
                 menace = new HashMap<>();
-                iter=0;
+                iter = 0;
             }
         }
     }
@@ -149,7 +154,7 @@ public class GameAction extends JPanel implements ActionListener {
     public void generateMenaces() {
         Random random = new Random();
         int v = random.nextInt(4);
-        Vector vector = Vector.values()[v];
+        src.SupportClass.Vector vector = src.SupportClass.Vector.values()[v];
         Cordinate cordinate = null;
         switch (vector) {
             case DOWN:
@@ -165,8 +170,7 @@ public class GameAction extends JPanel implements ActionListener {
                 cordinate = new Cordinate(0 - length, random.nextInt(height));
                 break;
             default:
-                cordinate = new Cordinate(random.nextInt(width), 0 - length);
-                vector = Vector.DOWN;
+             return;
         }
         menace.put(ID++, new Menace(cordinate, vector));
         check();
@@ -175,13 +179,13 @@ public class GameAction extends JPanel implements ActionListener {
     public void moveMenaces() {
         for (var m : menace.entrySet()) {
             Cordinate cor = m.getValue().cordinate;
-            if (m.getValue().vector == Vector.DOWN) {
+            if (m.getValue().vector == src.SupportClass.Vector.DOWN) {
                 menace.put(m.getKey(), new Menace(new Cordinate(cor.x, cor.y + menaceSpeed), m.getValue().vector));
-            } else if (m.getValue().vector == Vector.UP) {
+            } else if (m.getValue().vector == src.SupportClass.Vector.UP) {
                 menace.put(m.getKey(), new Menace(new Cordinate(cor.x, cor.y - menaceSpeed), m.getValue().vector));
-            } else if (m.getValue().vector == Vector.LEFT) {
+            } else if (m.getValue().vector == src.SupportClass.Vector.LEFT) {
                 menace.put(m.getKey(), new Menace(new Cordinate(cor.x - menaceSpeed, cor.y), m.getValue().vector));
-            } else if (m.getValue().vector == Vector.RIGHT) {
+            } else if (m.getValue().vector == src.SupportClass.Vector.RIGHT) {
                 menace.put(m.getKey(), new Menace(new Cordinate(cor.x + menaceSpeed, cor.y), m.getValue().vector));
             }
 
@@ -192,15 +196,37 @@ public class GameAction extends JPanel implements ActionListener {
 
         for (var cora : menace.entrySet()) {
             Cordinate cor = cora.getValue().cordinate;
-            if (cora.getValue().vector == Vector.UP && cor.y < 0)
+            if (cora.getValue().vector == src.SupportClass.Vector.UP && cor.y < 0)
                 delete.add(cora.getKey());
-            else if (cora.getValue().vector == Vector.DOWN && cor.y > height)
+            else if (cora.getValue().vector == src.SupportClass.Vector.DOWN && cor.y > height)
                 delete.add(cora.getKey());
-            else if (cora.getValue().vector == Vector.LEFT && cor.x < 0)
+            else if (cora.getValue().vector == src.SupportClass.Vector.LEFT && cor.x < 0)
                 delete.add(cora.getKey());
             else if (cora.getValue().vector == Vector.RIGHT && cor.x > width)
                 delete.add(cora.getKey());
         }
+    }
+
+    public void settingLabel() {
+        label = new JLabel("0");
+        label.setLocation(width / 2 - width / 10, height / 25);
+        label.setBounds(width / 2 - width / 10, height / 25, width / 10, width / 25);
+        label.setBackground(Color.CYAN);
+        label.setOpaque(true);
+        this.add(label);
+    }
+
+    public void mouseMotion() {
+        MouseMotionListener mouseMotionListener = new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (mouseMoved) {
+                    hero.setX(e.getX());
+                    hero.setY(e.getY());
+                }
+            }
+        };
+        jFrame.addMouseMotionListener(mouseMotionListener);
     }
 
 }

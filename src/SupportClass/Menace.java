@@ -1,8 +1,9 @@
-package src;
+package src.SupportClass;
+
 public class Menace {
 
-    Cordinate cordinate;
-    Vector vector;
+    public Cordinate cordinate;
+    public Vector vector;
 
     public Menace(Cordinate cordinate, Vector vector) {
         this.cordinate = cordinate;

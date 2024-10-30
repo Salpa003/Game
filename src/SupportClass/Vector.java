@@ -1,4 +1,4 @@
-package src;
+package src.SupportClass;
 
 public enum Vector {
     UP,

@@ -1,9 +1,12 @@
 package src;
 public class Hero {
+  final   int width = Main.dimension.width;
+  final   int height = Main.dimension.height;
     private  int x;
     private int y;
-    public static int sizeHero = 30;
-    private int speed = 10;
+    public static final int sizeHero = 30;
+    private int  speed = 10;
+    public final int  dash = 80;
 
     private boolean up, down, left, right;
 
@@ -22,12 +25,23 @@ public class Hero {
 
     public void up() {
         y-=speed;
+        if(y<=0)
+            y=1;
     }
     public void down() {
         y+=speed;
+        if (y>=height-sizeHero)
+            y=height-sizeHero-1;
     }
     public void left() {
         x-=speed;
+        if (x<=0)
+            x=1;
+    }
+    public void right() {
+        x+=speed;
+        if (x>=width-sizeHero)
+            x=width-sizeHero-1;
     }
 
     public void setUp(boolean up) {
@@ -46,9 +60,6 @@ public class Hero {
         this.right = right;
     }
 
-    public void right() {
-        x+=speed;
-    }
 
     public int getX() {
         return x;

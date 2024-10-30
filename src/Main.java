@@ -12,17 +12,6 @@ public class Main  {
     gameAction.setBackground(Color.BLACK);
     jFrame.add(gameAction,SwingConstants.CENTER);
     gameAction.requestFocusInWindow();
-
-
-//    Hero hero = gameAction.h();
-//        MouseMotionListener mouseMotionListener = new MouseMotionAdapter() {
-//            @Override
-//            public void mouseMoved(MouseEvent e) {
-//                hero.setX(e.getX());
-//                hero.setY(e.getY());
-//            }
-//        };
-//    jFrame.addMouseMotionListener(mouseMotionListener);
     }
 
     private static JFrame getJFrame() {
