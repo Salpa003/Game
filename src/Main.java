@@ -3,17 +3,26 @@ package src;
 import javax.swing.*;
 import java.awt.*;
 
-public class Main {
+public class Main  {
   static   Toolkit toolkit =Toolkit.getDefaultToolkit();
    static Dimension dimension = toolkit.getScreenSize();
     public static void main(String[] args) {
-        JFrame jFrame = getJFrame();
-        Hero hero =new Hero(dimension.width/2-Hero.sizeHero,dimension.height/2-Hero.sizeHero);
-        jFrame.add(hero);
-        hero.setBackground(Color.BLACK);
-        Menace menace = new Menace(dimension.width, dimension.height, 0,0);
-        hero.setMenace(menace);
-        hero.requestFocusInWindow();
+    JFrame jFrame = getJFrame();
+    GameAction gameAction = new GameAction(jFrame);
+    gameAction.setBackground(Color.BLACK);
+    jFrame.add(gameAction,SwingConstants.CENTER);
+    gameAction.requestFocusInWindow();
+
+
+//    Hero hero = gameAction.h();
+//        MouseMotionListener mouseMotionListener = new MouseMotionAdapter() {
+//            @Override
+//            public void mouseMoved(MouseEvent e) {
+//                hero.setX(e.getX());
+//                hero.setY(e.getY());
+//            }
+//        };
+//    jFrame.addMouseMotionListener(mouseMotionListener);
     }
 
     private static JFrame getJFrame() {

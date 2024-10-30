@@ -1,0 +1,206 @@
+package src;
+
+import javax.swing.*;
+import javax.swing.Timer;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
+import java.util.*;
+
+import static java.awt.event.KeyEvent.*;
+
+public class GameAction extends JPanel implements ActionListener {
+    int timerDelay = 10;
+    int menaceSize = 40;
+    int menaceSpeed = 10;
+    long ID = Long.MIN_VALUE;
+    int width = Main.dimension.width;
+    int height = Main.dimension.height;
+    Hero hero;
+    Timer timer;
+    Map<Long, Menace> menace;
+    ArrayList<Long> delete = new ArrayList<>();
+    JFrame jFrame;
+    JLabel label;
+
+    public GameAction(JFrame jFrame) {
+        this.jFrame = jFrame;
+        timer = new Timer(timerDelay, this);
+        timer.start();
+        hero = new Hero(width / 2 - Hero.sizeHero, height / 2 - Hero.sizeHero);
+        setFocusable(true);
+        keyAction();
+        menace = new HashMap<>();
+
+        label = new JLabel("0");
+        label.setLocation(width/2-width/10, height/25);
+      //  label.setBounds(width/2-width/10, height/25,width/10 , width/25);
+        label.setBackground(Color.CYAN);
+        label.setOpaque(true);
+        this.add(label);
+    }
+
+    int iter = 0;
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (hero.isUp()) hero.up();
+        if (hero.isDown()) hero.down();
+        if (hero.isLeft()) hero.left();
+        if (hero.isRight()) hero.right();
+
+        iter++;
+
+            label.setText(String.valueOf(iter/(1000/timerDelay)));
+
+        if (iter % 10 == 0) {
+            generateMenaces();
+        }
+        moveMenaces();
+        if (iter % 50 == 0) {
+            for (Long id : delete) {
+                menace.remove(id);
+            }
+            delete.clear();
+            jFrame.setTitle(String.valueOf(menace.size()));
+        }
+        repaint();
+    }
+
+    public void keyAction() {
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                super.keyPressed(e);
+                switch (e.getKeyCode()) {
+                    case VK_W:
+                        hero.setUp(true);
+                        break;
+                    case VK_S:
+                        hero.setDown(true);
+                        break;
+                    case VK_A:
+                        hero.setLeft(true);
+                        break;
+                    case VK_D:
+                        hero.setRight(true);
+                        break;
+                }
+                if (!timer.isRunning()) {
+                    timer.start();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                super.keyReleased(e);
+                switch (e.getKeyCode()) {
+                    case VK_W:
+                        hero.setUp(false);
+                        break;
+                    case VK_S:
+                        hero.setDown(false);
+                        break;
+                    case VK_A:
+                        hero.setLeft(false);
+                        break;
+                    case VK_D:
+                        hero.setRight(false);
+                        break;
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        printHero((Graphics2D) g);
+        printMenaces((Graphics2D) g);
+
+    }
+
+    private void printHero(Graphics2D g) {
+        Ellipse2D ellipse2D = new Ellipse2D.Double(hero.getX(), hero.getY(), hero.getSizeHero(), hero.getSizeHero());
+        g.setPaint(Color.GREEN);
+        g.fill(ellipse2D);
+    }
+
+    private void printMenaces(Graphics2D g) {
+        g.setPaint(Color.red);
+        for (Menace m : menace.values()) {
+            Rectangle2D rectangle2D = new Rectangle2D.Double(m.cordinate.x, m.cordinate.y, menaceSize, menaceSize);
+            g.fill(rectangle2D);
+
+            Ellipse2D ellipse2D = new Ellipse2D.Double(hero.getX(), hero.getY(), hero.getSizeHero(), hero.getSizeHero());
+            if (ellipse2D.intersects(rectangle2D)) {
+                hero.setX(width / 2 - Hero.sizeHero);
+                hero.setY(height / 2 - Hero.sizeHero);
+                timer.stop();
+                menace = new HashMap<>();
+                iter=0;
+            }
+        }
+    }
+
+    int length = 50;
+
+    public void generateMenaces() {
+        Random random = new Random();
+        int v = random.nextInt(4);
+        Vector vector = Vector.values()[v];
+        Cordinate cordinate = null;
+        switch (vector) {
+            case DOWN:
+                cordinate = new Cordinate(random.nextInt(width), 0 - length);
+                break;
+            case UP:
+                cordinate = new Cordinate(random.nextInt(width), height + length);
+                break;
+            case LEFT:
+                cordinate = new Cordinate(width + length, random.nextInt(height));
+                break;
+            case RIGHT:
+                cordinate = new Cordinate(0 - length, random.nextInt(height));
+                break;
+            default:
+                cordinate = new Cordinate(random.nextInt(width), 0 - length);
+                vector = Vector.DOWN;
+        }
+        menace.put(ID++, new Menace(cordinate, vector));
+        check();
+    }
+
+    public void moveMenaces() {
+        for (var m : menace.entrySet()) {
+            Cordinate cor = m.getValue().cordinate;
+            if (m.getValue().vector == Vector.DOWN) {
+                menace.put(m.getKey(), new Menace(new Cordinate(cor.x, cor.y + menaceSpeed), m.getValue().vector));
+            } else if (m.getValue().vector == Vector.UP) {
+                menace.put(m.getKey(), new Menace(new Cordinate(cor.x, cor.y - menaceSpeed), m.getValue().vector));
+            } else if (m.getValue().vector == Vector.LEFT) {
+                menace.put(m.getKey(), new Menace(new Cordinate(cor.x - menaceSpeed, cor.y), m.getValue().vector));
+            } else if (m.getValue().vector == Vector.RIGHT) {
+                menace.put(m.getKey(), new Menace(new Cordinate(cor.x + menaceSpeed, cor.y), m.getValue().vector));
+            }
+
+        }
+    }
+
+    public void check() {
+
+        for (var cora : menace.entrySet()) {
+            Cordinate cor = cora.getValue().cordinate;
+            if (cora.getValue().vector == Vector.UP && cor.y < 0)
+                delete.add(cora.getKey());
+            else if (cora.getValue().vector == Vector.DOWN && cor.y > height)
+                delete.add(cora.getKey());
+            else if (cora.getValue().vector == Vector.LEFT && cor.x < 0)
+                delete.add(cora.getKey());
+            else if (cora.getValue().vector == Vector.RIGHT && cor.x > width)
+                delete.add(cora.getKey());
+        }
+    }
+
+}
