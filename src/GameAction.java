@@ -15,14 +15,20 @@ import java.util.*;
 import static java.awt.event.KeyEvent.*;
 
 public class GameAction extends JPanel implements ActionListener {
+    long ID = Long.MIN_VALUE;
+    boolean lose = false;
     boolean mouseMoved = false;
+
    final int timerDelay = 10;
     int iter = 0;
+    final int iterSpawnMenace = 5;
    final int menaceSize = 40;
    final int menaceSpeed = 10;
-    long ID = Long.MIN_VALUE;
+
+
   final   int width = Main.dimension.width;
    final int height = Main.dimension.height;
+
     Hero hero;
     Timer timer;
     Map<Long, Menace> menace;
@@ -56,7 +62,7 @@ public class GameAction extends JPanel implements ActionListener {
 
         label.setText(String.valueOf(iter / (1000 / timerDelay)));
 
-        if (iter % 10 == 0) {
+        if (iter % iterSpawnMenace == 0) {
             generateMenaces();
         }
         moveMenaces();
@@ -91,10 +97,14 @@ public class GameAction extends JPanel implements ActionListener {
                     case VK_M:
                         mouseMoved = !mouseMoved;
                         break;
+                    case VK_R:
+                        if (!timer.isRunning()) {
+                            timer.start();
+                            lose = false;
+                        }
+                        break;
                 }
-                if (!timer.isRunning()) {
-                    timer.start();
-                }
+
             }
 
             @Override
@@ -123,13 +133,20 @@ public class GameAction extends JPanel implements ActionListener {
         super.paintComponent(g);
         printHero((Graphics2D) g);
         printMenaces((Graphics2D) g);
-
+        if (lose)
+            printLose((Graphics2D) g);
     }
 
     private void printHero(Graphics2D g) {
         Ellipse2D ellipse2D = new Ellipse2D.Double(hero.getX(), hero.getY(), hero.getSizeHero(), hero.getSizeHero());
         g.setPaint(Color.GREEN);
         g.fill(ellipse2D);
+    }
+
+    private void printLose(Graphics2D g) {
+        g.setPaint(Color.BLUE);
+        g.setFont(new Font("Arial", Font.PLAIN, 50));
+        g.drawString("Вы проиграли! Нажмите 'R' для респауна.", width/5, height/2);
     }
 
     private void printMenaces(Graphics2D g) {
@@ -140,11 +157,12 @@ public class GameAction extends JPanel implements ActionListener {
 
             Ellipse2D ellipse2D = new Ellipse2D.Double(hero.getX(), hero.getY(), hero.getSizeHero(), hero.getSizeHero());
             if (ellipse2D.intersects(rectangle2D)) {
-                hero.setX(width / 2 - Hero.sizeHero);
-                hero.setY(height / 2 - Hero.sizeHero);
                 timer.stop();
-                menace = new HashMap<>();
-                iter = 0;
+                    hero.setX(width / 2 - Hero.sizeHero);
+                    hero.setY(height / 2 - Hero.sizeHero);
+                    menace = new HashMap<>();
+                    iter = 0;
+                    lose = true;
             }
         }
     }
