@@ -21,7 +21,7 @@ public class GameAction extends JPanel implements ActionListener {
 
    final int timerDelay = 10;
     int iter = 0;
-    final int iterSpawnMenace = 5;
+    final int iterSpawnMenace = 8;
    final int menaceSize = 40;
    final int menaceSpeed = 10;
 
