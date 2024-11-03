@@ -21,7 +21,7 @@ public class GameAction extends JPanel implements ActionListener {
 
    final int timerDelay = 10;
     int iter = 0;
-    final int iterSpawnMenace = 5;
+    int iterSpawnMenace = 5;
    final int menaceSize = 40;
    final int menaceSpeed = 10;
 
@@ -102,6 +102,14 @@ public class GameAction extends JPanel implements ActionListener {
                             timer.start();
                             lose = false;
                         }
+                        break;
+                    case VK_UP:
+                        iterSpawnMenace++;
+                        jFrame.setTitle(String.valueOf(iterSpawnMenace));
+                        break;
+                    case VK_DOWN:
+                        iterSpawnMenace--;
+                        jFrame.setTitle(String.valueOf(iterSpawnMenace));
                         break;
                 }
 
