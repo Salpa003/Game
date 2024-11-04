@@ -18,16 +18,17 @@ public class GameAction extends JPanel implements ActionListener {
     long ID = Long.MIN_VALUE;
     boolean lose = false;
     boolean mouseMoved = false;
+    boolean multiColor = false;
 
-   final int timerDelay = 10;
+    final int timerDelay = 10;
     int iter = 0;
     int iterSpawnMenace = 5;
-   final int menaceSize = 40;
-   final int menaceSpeed = 10;
+    final int menaceSize = 40;
+     int menaceSpeed = 10;
 
 
-  final   int width = Main.dimension.width;
-   final int height = Main.dimension.height;
+    final int width = Main.dimension.width;
+    final int height = Main.dimension.height;
 
     Hero hero;
     Timer timer;
@@ -111,6 +112,17 @@ public class GameAction extends JPanel implements ActionListener {
                         iterSpawnMenace--;
                         jFrame.setTitle(String.valueOf(iterSpawnMenace));
                         break;
+                    case VK_LEFT:
+                        menaceSpeed--;
+                        jFrame.setTitle(String.valueOf(menaceSpeed));
+                        break;
+                    case VK_RIGHT:
+                        menaceSpeed++;
+                        jFrame.setTitle(String.valueOf(menaceSpeed));
+                        break;
+                    case VK_P:
+                        multiColor = !multiColor;
+                        break;
                 }
 
             }
@@ -154,23 +166,41 @@ public class GameAction extends JPanel implements ActionListener {
     private void printLose(Graphics2D g) {
         g.setPaint(Color.BLUE);
         g.setFont(new Font("Arial", Font.PLAIN, 50));
-        g.drawString("Вы проиграли! Нажмите 'R' для респауна.", width/5, height/2);
+        g.drawString("Вы проиграли! Нажмите 'R' для респауна.", width / 5, height / 2);
     }
 
     private void printMenaces(Graphics2D g) {
         g.setPaint(Color.red);
         for (Menace m : menace.values()) {
             Rectangle2D rectangle2D = new Rectangle2D.Double(m.cordinate.x, m.cordinate.y, menaceSize, menaceSize);
+
+            if (multiColor) {
+                switch (m.vector) {
+                    case DOWN:
+                        g.setPaint(Color.BLUE);
+                        break;
+                    case UP:
+                        g.setPaint(Color.WHITE);
+                        break;
+                    case RIGHT:
+                        g.setPaint(Color.RED);
+                        break;
+                    case LEFT:
+                        g.setPaint(Color.CYAN);
+                        break;
+                }
+            }
+
             g.fill(rectangle2D);
 
             Ellipse2D ellipse2D = new Ellipse2D.Double(hero.getX(), hero.getY(), hero.getSizeHero(), hero.getSizeHero());
             if (ellipse2D.intersects(rectangle2D)) {
                 timer.stop();
-                    hero.setX(width / 2 - Hero.sizeHero);
-                    hero.setY(height / 2 - Hero.sizeHero);
-                    menace = new HashMap<>();
-                    iter = 0;
-                    lose = true;
+                hero.setX(width / 2 - Hero.sizeHero);
+                hero.setY(height / 2 - Hero.sizeHero);
+                menace = new HashMap<>();
+                iter = 0;
+                lose = true;
             }
         }
     }
@@ -196,7 +226,7 @@ public class GameAction extends JPanel implements ActionListener {
                 cordinate = new Cordinate(0 - length, random.nextInt(height));
                 break;
             default:
-             return;
+                return;
         }
         menace.put(ID++, new Menace(cordinate, vector));
         check();
